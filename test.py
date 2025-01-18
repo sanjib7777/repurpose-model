@@ -14,7 +14,7 @@ payload = {
 
 try:
     # Send POST request
-    response = requests.post(url, json=payload)
+    response = requests.get(url, json=payload)
 
     # Print response
     print(f"Status Code: {response.status_code}")

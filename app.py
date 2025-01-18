@@ -27,8 +27,13 @@ class InputData(BaseModel):
     material: str
     item_price: float
 
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the Reward Points Prediction API!"}
+
+
 # Define the predict endpoint
-@app.post("/predict")
+@app.get("/predict")
 def predict(input_data: InputData):
     # Validate input fields
     valid_parts = ["EXTERIOR", "INTERIOR"]
