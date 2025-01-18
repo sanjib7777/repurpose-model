@@ -1,4 +1,3 @@
-
 # 1. Library imports
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -34,11 +33,11 @@ def predict(input_data: InputData):
     # Validate input fields
     valid_parts = ["EXTERIOR", "INTERIOR"]
     valid_materials = [
-        'cotton', 'viscose', 'fiber', 'elastane', 'polyester', 'linen', 
-        'lyocell', 'polyamide', 'nylon', 'wool', 'acrylic', 'camel', 
+        'cotton', 'viscose', 'fiber', 'elastane', 'polyester', 'linen',
+        'lyocell', 'polyamide', 'nylon', 'wool', 'acrylic', 'camel',
         'cupro', 'modal'
     ]
-    
+
     if input_data.part_name not in valid_parts:
         raise HTTPException(status_code=400, detail="Invalid part name! Must be 'EXTERIOR' or 'INTERIOR'.")
     if input_data.material not in valid_materials:
@@ -59,20 +58,3 @@ def predict(input_data: InputData):
         return {"reward_points": positive_reward_points}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
-
-# Add a main block for local testing
-if __name__ == "__main__":
-    # Test data
-    test_input = InputData(
-        part_name="EXTERIOR",
-        eco_friendly=True,
-        material="cotton",
-        item_price=120.50
-    )
-    
-    # Print test prediction
-    try:
-        prediction_result = predict(test_input)
-        print(f"Test Prediction Result: {prediction_result}")
-    except Exception as e:
-        print(f"Error during prediction: {str(e)}")
