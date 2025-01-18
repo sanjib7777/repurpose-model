@@ -1,3 +1,5 @@
+
+# 1. Library imports
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import pandas as pd
@@ -57,3 +59,20 @@ def predict(input_data: InputData):
         return {"reward_points": positive_reward_points}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
+
+# Add a main block for local testing
+if __name__ == "__main__":
+    # Test data
+    test_input = InputData(
+        part_name="EXTERIOR",
+        eco_friendly=True,
+        material="cotton",
+        item_price=120.50
+    )
+    
+    # Print test prediction
+    try:
+        prediction_result = predict(test_input)
+        print(f"Test Prediction Result: {prediction_result}")
+    except Exception as e:
+        print(f"Error during prediction: {str(e)}")
