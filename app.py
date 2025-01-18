@@ -4,10 +4,10 @@ import pandas as pd
 import pickle
 import os
 
-# Check if the model exists
-model_file_path = 'model.pkl'
+# Define the model file path dynamically
+model_file_path = os.path.join(os.getcwd(), 'model.pkl')
 if not os.path.exists(model_file_path):
-    raise FileNotFoundError('Model file not found! Please ensure model.pkl is present.')
+    raise FileNotFoundError('Model file not found! Ensure model.pkl is uploaded correctly.')
 
 # Load the model
 try:
@@ -28,12 +28,10 @@ class InputData(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to the Reward Points Prediction API!"}
+    return {"message": "Welcome to the Reward Points Prediction API hosted on Render!"}
 
-# Define the predict endpoint
 @app.post("/predict")
 def predict(input_data: InputData):
-    # Validate input fields
     valid_parts = ["EXTERIOR", "INTERIOR"]
     valid_materials = [
         'cotton', 'viscose', 'fiber', 'elastane', 'polyester', 'linen',
@@ -46,7 +44,6 @@ def predict(input_data: InputData):
     if input_data.material not in valid_materials:
         raise HTTPException(status_code=400, detail=f"Invalid material! Choose from: {', '.join(valid_materials)}.")
 
-    # Prepare data for prediction
     input_df = pd.DataFrame([{
         "part_name": input_data.part_name,
         "eco_friendly": input_data.eco_friendly,
@@ -54,14 +51,9 @@ def predict(input_data: InputData):
         "item_price": input_data.item_price
     }])
 
-    # Predict reward points
     try:
         reward_points = model.predict(input_df)[0]
-        positive_reward_points = max(0, reward_points)  # Ensure reward points are non-negative
+        positive_reward_points = max(0, reward_points)
         return {"reward_points": positive_reward_points}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
