@@ -1,4 +1,3 @@
-# Updated app.py
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import pandas as pd
@@ -31,9 +30,8 @@ class InputData(BaseModel):
 def read_root():
     return {"message": "Welcome to the Reward Points Prediction API!"}
 
-
 # Define the predict endpoint
-@app.get("/predict")
+@app.post("/predict")
 def predict(input_data: InputData):
     # Validate input fields
     valid_parts = ["EXTERIOR", "INTERIOR"]
@@ -66,4 +64,4 @@ def predict(input_data: InputData):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app:app", host="0.0.0.0", port=8000)
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)

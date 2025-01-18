@@ -2,7 +2,7 @@
 import requests
 
 # Replace with your Vercel URL
-url = "https://repurpose-model-q0uaf6n0o-sanjib-shahs-projects.vercel.app/predict"
+url = "https://repurpose-model-g4jtgt0mw-sanjib-shahs-projects.vercel.app/predict"
 
 # Sample payload
 payload = {
