@@ -1,8 +1,8 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from flask import Flask, request, jsonify
 import pandas as pd
 import pickle
 import os
+from werkzeug.exceptions import BadRequest
 
 # Define the model file path dynamically
 model_file_path = os.path.join(os.getcwd(), 'model.pkl')
@@ -16,44 +16,55 @@ try:
 except Exception as e:
     raise RuntimeError(f"Error loading model: {str(e)}")
 
-# Initialize the FastAPI app
-app = FastAPI()
+# Initialize the Flask app
+app = Flask(__name__)
 
-# Define the input schema
-class InputData(BaseModel):
-    part_name: str
-    eco_friendly: bool
-    material: str
-    item_price: float
+# Define the input schema validation
+valid_parts = ["EXTERIOR", "INTERIOR"]
+valid_materials = [
+    'cotton', 'viscose', 'fiber', 'elastane', 'polyester', 'linen',
+    'lyocell', 'polyamide', 'nylon', 'wool', 'acrylic', 'camel',
+    'cupro', 'modal'
+]
 
-@app.get("/")
+@app.route('/')
 def read_root():
-    return {"message": "Welcome to the Reward Points Prediction API hosted on Render!"}
+    return {"message": "Welcome to the Reward Points Prediction API hosted on Flask!"}
 
-@app.post("/predict")
-def predict(input_data: InputData):
-    valid_parts = ["EXTERIOR", "INTERIOR"]
-    valid_materials = [
-        'cotton', 'viscose', 'fiber', 'elastane', 'polyester', 'linen',
-        'lyocell', 'polyamide', 'nylon', 'wool', 'acrylic', 'camel',
-        'cupro', 'modal'
-    ]
-
-    if input_data.part_name not in valid_parts:
-        raise HTTPException(status_code=400, detail="Invalid part name! Must be 'EXTERIOR' or 'INTERIOR'.")
-    if input_data.material not in valid_materials:
-        raise HTTPException(status_code=400, detail=f"Invalid material! Choose from: {', '.join(valid_materials)}.")
-
-    input_df = pd.DataFrame([{
-        "part_name": input_data.part_name,
-        "eco_friendly": input_data.eco_friendly,
-        "material": input_data.material,
-        "item_price": input_data.item_price
-    }])
-
+@app.route('/predict', methods=['POST'])
+def predict():
     try:
-        reward_points = model.predict(input_df)[0]
-        positive_reward_points = max(0, reward_points)
-        return {"reward_points": positive_reward_points}
+        # Extract data from request
+        input_data = request.get_json()
+
+        # Validate input data
+        part_name = input_data.get("part_name")
+        material = input_data.get("material")
+        eco_friendly = input_data.get("eco_friendly")
+        item_price = input_data.get("item_price")
+
+        if part_name not in valid_parts:
+            raise BadRequest(f"Invalid part name! Must be 'EXTERIOR' or 'INTERIOR'.")
+        if material not in valid_materials:
+            raise BadRequest(f"Invalid material! Choose from: {', '.join(valid_materials)}.")
+
+        # Prepare the input data for prediction
+        input_df = pd.DataFrame([{
+            "part_name": part_name,
+            "eco_friendly": eco_friendly,
+            "material": material,
+            "item_price": item_price
+        }])
+
+        # Predict reward points
+        try:
+            reward_points = model.predict(input_df)[0]
+            positive_reward_points = max(0, reward_points)
+            return jsonify({"reward_points": positive_reward_points})
+        except Exception as e:
+            raise RuntimeError(f"Prediction error: {str(e)}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
+        return jsonify({"error": str(e)}), 400
+
+if __name__ == "__main__":
+    app.run(debug=True)

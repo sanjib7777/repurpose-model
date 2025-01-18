@@ -1,6 +1,0 @@
-services:
-  - type: web
-    name: fastapi-reward-points
-    env: python
-    buildCommand: ""
-    startCommand: gunicorn -w 4 -k uvicorn.workers.UvicornWorker app:app
