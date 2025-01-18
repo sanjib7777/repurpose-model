@@ -1,4 +1,4 @@
-# 1. Library imports
+# Updated app.py
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import pandas as pd
@@ -54,7 +54,8 @@ def predict(input_data: InputData):
     # Predict reward points
     try:
         reward_points = model.predict(input_df)[0]
-        positive_reward_points = abs(reward_points)  # Ensure reward points are positive
+        positive_reward_points = max(0, reward_points)  # Ensure reward points are non-negative
         return {"reward_points": positive_reward_points}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
+
