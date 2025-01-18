@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.wsgi import WSGIMiddleware
 from pydantic import BaseModel
 import pandas as pd
 import pickle
@@ -57,3 +58,9 @@ def predict(input_data: InputData):
         return {"reward_points": positive_reward_points}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
+
+# Wrap the FastAPI app as WSGI
+from wsgiref.simple_server import make_server
+
+def app_wsgi(environ, start_response):
+    return WSGIMiddleware(app)(environ, start_response)
