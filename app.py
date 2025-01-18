@@ -57,12 +57,14 @@ def predict():
         }])
 
         # Predict reward points
+        # Predict reward points
         try:
             reward_points = model.predict(input_df)[0]
-            positive_reward_points = max(0, reward_points)
-            return jsonify({"reward_points": positive_reward_points})
+            absolute_reward_points = abs(reward_points)  # Convert negative to positive
+            return jsonify({"reward_points": absolute_reward_points})
         except Exception as e:
             raise RuntimeError(f"Prediction error: {str(e)}")
+
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
